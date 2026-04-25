@@ -3,8 +3,12 @@
 from __future__ import annotations
 
 import binascii
+import secrets
 import textwrap
+import time
+from typing import Any
 
+import jwt
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 
@@ -43,3 +47,33 @@ def _normalize_pem(secret_key: str) -> str:
     )
     serialization.load_pem_private_key(pem.encode(), password=None, backend=default_backend())
     return pem
+
+
+def _build_jwt(api_key: str, pem: str, uri: str | None = None) -> str:
+    """Build an ES256 JWT for Coinbase Advanced Trade API authentication.
+
+    Args:
+        api_key: The Coinbase API key name (used as ``sub`` and ``kid``).
+        pem: A valid PEM-encoded EC private key string.
+        uri: Request URI for REST calls (e.g. ``"GET api.coinbase.com/v3/..."``).
+            Pass ``None`` for WebSocket connections — omits the ``uri`` claim.
+
+    Returns:
+        A signed JWT string.
+    """
+    private_key = serialization.load_pem_private_key(pem.encode(), password=None)
+    now = int(time.time())
+    claims: dict[str, Any] = {
+        "sub": api_key,
+        "iss": "cdp",
+        "nbf": now,
+        "exp": now + 120,
+    }
+    if uri is not None:
+        claims["uri"] = uri
+    return jwt.encode(
+        claims,
+        private_key,
+        algorithm="ES256",
+        headers={"kid": api_key, "nonce": secrets.token_hex()},
+    )
