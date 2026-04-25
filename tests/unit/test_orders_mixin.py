@@ -94,3 +94,94 @@ async def test_place_order_not_ready_raises():
         await mixin.place_order(
             "BTC-USD", OrderType.LIMIT, TradeType.BUY, Decimal("0.1"), Decimal("50000")
         )
+
+
+@pytest.mark.asyncio
+async def test_place_limit_maker_order():
+    rest = MockRestClient()
+    rest.register(
+        "place_order",
+        {
+            "success": True,
+            "order_id": "o2",
+            "success_response": {
+                "order_id": "o2",
+                "product_id": "BTC-USD",
+                "side": "SELL",
+                "client_order_id": "c2",
+            },
+        },
+    )
+    mixin = _TestableOrders(rest)
+    client_id = await mixin.place_order(
+        "BTC-USD",
+        OrderType.LIMIT_MAKER,
+        TradeType.SELL,
+        Decimal("0.5"),
+        Decimal("60000"),
+    )
+    assert client_id.startswith("coinbase-")
+
+
+@pytest.mark.asyncio
+async def test_place_market_order():
+    rest = MockRestClient()
+    rest.register(
+        "place_order",
+        {
+            "success": True,
+            "order_id": "o3",
+            "success_response": {
+                "order_id": "o3",
+                "product_id": "BTC-USD",
+                "side": "BUY",
+                "client_order_id": "c3",
+            },
+        },
+    )
+    mixin = _TestableOrders(rest)
+    client_id = await mixin.place_order(
+        "BTC-USD",
+        OrderType.MARKET,
+        TradeType.BUY,
+        Decimal("0.1"),
+        None,
+    )
+    assert client_id.startswith("coinbase-")
+
+
+@pytest.mark.asyncio
+async def test_place_order_failure_raises_order_rejected():
+    from market_connector.exceptions import OrderRejectedError
+
+    rest = MockRestClient()
+    rest.register(
+        "place_order",
+        {
+            "success": False,
+            "failure_reason": "INSUFFICIENT_FUND",
+        },
+    )
+    mixin = _TestableOrders(rest)
+    with pytest.raises(OrderRejectedError):
+        await mixin.place_order(
+            "BTC-USD", OrderType.LIMIT, TradeType.BUY, Decimal("999"), Decimal("50000")
+        )
+
+
+@pytest.mark.asyncio
+async def test_cancel_order_not_ready_raises():
+    rest = MockRestClient()
+    mixin = _TestableOrders(rest)
+    mixin._started = False
+    with pytest.raises(GatewayNotStartedError):
+        await mixin.cancel_order("BTC-USD", "c1")
+
+
+@pytest.mark.asyncio
+async def test_get_open_orders_not_ready_raises():
+    rest = MockRestClient()
+    mixin = _TestableOrders(rest)
+    mixin._started = False
+    with pytest.raises(GatewayNotStartedError):
+        await mixin.get_open_orders("BTC-USD")

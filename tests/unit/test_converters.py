@@ -81,6 +81,85 @@ def test_to_open_order_from_limit():
     assert result.order_type == OrderType.LIMIT
 
 
+def test_to_open_order_from_limit_maker():
+    from coinbase_connector.schemas.rest import LimitGTCConfig, OrderConfiguration
+
+    order = Order(
+        order_id="o2",
+        client_order_id="c2",
+        product_id="BTC-USD",
+        side="SELL",
+        status="OPEN",
+        order_configuration=OrderConfiguration(
+            limit_limit_gtc=LimitGTCConfig(base_size="0.3", limit_price="60000", post_only=True),
+        ),
+        filled_size="0",
+        average_filled_price="0",
+    )
+    result = to_open_order(order)
+    assert result.order_type == OrderType.LIMIT_MAKER
+
+
+def test_to_open_order_from_limit_gtd():
+    from coinbase_connector.schemas.rest import LimitGTDConfig, OrderConfiguration
+
+    order = Order(
+        order_id="o3",
+        client_order_id="c3",
+        product_id="BTC-USD",
+        side="BUY",
+        status="OPEN",
+        order_configuration=OrderConfiguration(
+            limit_limit_gtd=LimitGTDConfig(
+                base_size="0.2", limit_price="55000", end_time="2026-05-01T00:00:00Z"
+            ),
+        ),
+        filled_size="0",
+        average_filled_price="0",
+    )
+    result = to_open_order(order)
+    assert result.order_type == OrderType.LIMIT
+    assert result.amount == Decimal("0.2")
+
+
+def test_to_open_order_from_market_ioc():
+    from coinbase_connector.schemas.rest import MarketIOCConfig, OrderConfiguration
+
+    order = Order(
+        order_id="o4",
+        client_order_id="c4",
+        product_id="BTC-USD",
+        side="BUY",
+        status="FILLED",
+        order_configuration=OrderConfiguration(
+            market_market_ioc=MarketIOCConfig(base_size="0.1"),
+        ),
+        filled_size="0.1",
+        average_filled_price="50000",
+    )
+    result = to_open_order(order)
+    assert result.order_type == OrderType.MARKET
+    assert result.amount == Decimal("0.1")
+    assert result.price == Decimal("0")
+
+
+def test_to_open_order_no_configuration_fallback():
+    order = Order(
+        order_id="o5",
+        client_order_id="c5",
+        product_id="BTC-USD",
+        side="BUY",
+        status="OPEN",
+        order_configuration=None,
+        filled_size="0",
+        average_filled_price="0",
+    )
+    result = to_open_order(order)
+    assert result.order_type == OrderType.LIMIT
+    assert result.amount == Decimal("0")
+    assert result.price == Decimal("0")
+
+
 # ---------------------------------------------------------------------------
 # 4.4  Orderbook converters
 # ---------------------------------------------------------------------------

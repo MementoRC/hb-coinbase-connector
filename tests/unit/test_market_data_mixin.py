@@ -87,3 +87,29 @@ async def test_get_orderbook_not_ready_raises():
     mixin._started = False
     with pytest.raises(GatewayNotStartedError):
         await mixin.get_orderbook("BTC-USD")
+
+
+@pytest.mark.asyncio
+async def test_get_mid_price_empty_book_returns_zero():
+    rest = MockRestClient()
+    rest.register(
+        "product_book",
+        {
+            "pricebook": {
+                "product_id": "BTC-USD",
+                "bids": [],
+                "asks": [],
+            },
+        },
+    )
+    mixin = _TestableMarket(rest)
+    assert await mixin.get_mid_price("BTC-USD") == Decimal("0")
+
+
+@pytest.mark.asyncio
+async def test_get_candles_not_ready_raises():
+    rest = MockRestClient()
+    mixin = _TestableMarket(rest)
+    mixin._started = False
+    with pytest.raises(GatewayNotStartedError):
+        await mixin.get_candles("BTC-USD", "ONE_HOUR", 100)
