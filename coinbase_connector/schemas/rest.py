@@ -1,4 +1,5 @@
 """Coinbase Advanced Trade API REST response schema models."""
+
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field

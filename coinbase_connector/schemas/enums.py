@@ -1,4 +1,5 @@
 """Coinbase Advanced Trade API enum types."""
+
 from enum import StrEnum
 
 

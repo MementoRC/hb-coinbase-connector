@@ -1,4 +1,5 @@
 """Tests for CoinbaseGateway — Phase 7, Task 7.1."""
+
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, patch
@@ -106,5 +107,3 @@ def test_gateway_has_required_protocol_attributes(cfg: CoinbaseConfig) -> None:
     assert hasattr(gw, "_ws")
     assert hasattr(gw, "_endpoints")
     assert gw._config is cfg
-
-

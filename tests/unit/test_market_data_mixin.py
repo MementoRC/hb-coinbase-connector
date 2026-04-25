@@ -1,4 +1,5 @@
 """Tests for MarketDataMixin — Phase 6, Task 6.2."""
+
 from decimal import Decimal
 
 import pytest
@@ -22,13 +23,16 @@ class _TestableMarket(MarketDataMixin):
 @pytest.mark.asyncio
 async def test_get_orderbook_parses_response():
     rest = MockRestClient()
-    rest.register("product_book", {
-        "pricebook": {
-            "product_id": "BTC-USD",
-            "bids": [{"price": "50000", "size": "0.5"}],
-            "asks": [{"price": "50001", "size": "0.3"}],
+    rest.register(
+        "product_book",
+        {
+            "pricebook": {
+                "product_id": "BTC-USD",
+                "bids": [{"price": "50000", "size": "0.5"}],
+                "asks": [{"price": "50001", "size": "0.3"}],
+            },
         },
-    })
+    )
     mixin = _TestableMarket(rest)
     book = await mixin.get_orderbook("BTC-USD")
     assert book.trading_pair == "BTC-USD"
@@ -38,11 +42,16 @@ async def test_get_orderbook_parses_response():
 @pytest.mark.asyncio
 async def test_get_mid_price_computed_from_book():
     rest = MockRestClient()
-    rest.register("product_book", {
-        "pricebook": {"product_id": "BTC-USD",
-                      "bids": [{"price": "50000", "size": "1"}],
-                      "asks": [{"price": "50002", "size": "1"}]},
-    })
+    rest.register(
+        "product_book",
+        {
+            "pricebook": {
+                "product_id": "BTC-USD",
+                "bids": [{"price": "50000", "size": "1"}],
+                "asks": [{"price": "50002", "size": "1"}],
+            },
+        },
+    )
     mixin = _TestableMarket(rest)
     assert await mixin.get_mid_price("BTC-USD") == Decimal("50001")
 
@@ -50,10 +59,21 @@ async def test_get_mid_price_computed_from_book():
 @pytest.mark.asyncio
 async def test_get_candles_returns_list():
     rest = MockRestClient()
-    rest.register("candles", {"candles": [
-        {"start": "1714000000", "low": "49000", "high": "51000",
-         "open": "50000", "close": "50500", "volume": "10"},
-    ]})
+    rest.register(
+        "candles",
+        {
+            "candles": [
+                {
+                    "start": "1714000000",
+                    "low": "49000",
+                    "high": "51000",
+                    "open": "50000",
+                    "close": "50500",
+                    "volume": "10",
+                },
+            ]
+        },
+    )
     mixin = _TestableMarket(rest)
     candles = await mixin.get_candles("BTC-USD", "ONE_HOUR", 100)
     assert len(candles) == 1

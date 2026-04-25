@@ -1,4 +1,5 @@
 """Tests for OrdersMixin — Phase 6, Task 6.3."""
+
 from decimal import Decimal
 
 import pytest
@@ -23,16 +24,26 @@ class _TestableOrders(OrdersMixin):
 @pytest.mark.asyncio
 async def test_place_limit_order():
     rest = MockRestClient()
-    rest.register("place_order", {
-        "success": True, "order_id": "o1",
-        "success_response": {
-            "order_id": "o1", "product_id": "BTC-USD",
-            "side": "BUY", "client_order_id": "c1",
+    rest.register(
+        "place_order",
+        {
+            "success": True,
+            "order_id": "o1",
+            "success_response": {
+                "order_id": "o1",
+                "product_id": "BTC-USD",
+                "side": "BUY",
+                "client_order_id": "c1",
+            },
         },
-    })
+    )
     mixin = _TestableOrders(rest)
     client_id = await mixin.place_order(
-        "BTC-USD", OrderType.LIMIT, TradeType.BUY, Decimal("0.5"), Decimal("50000"),
+        "BTC-USD",
+        OrderType.LIMIT,
+        TradeType.BUY,
+        Decimal("0.5"),
+        Decimal("50000"),
     )
     # Returns a generated client_id (coinbase-<uuid>) — not echoed back from mock
     assert client_id.startswith("coinbase-")
@@ -49,12 +60,25 @@ async def test_cancel_order_returns_true():
 @pytest.mark.asyncio
 async def test_get_open_orders_filters_by_pair():
     rest = MockRestClient()
-    rest.register("list_orders", {"orders": [
-        {"order_id": "o1", "client_order_id": "c1", "product_id": "BTC-USD",
-         "side": "BUY", "status": "OPEN",
-         "order_configuration": {"limit_limit_gtc": {"base_size": "0.5", "limit_price": "50000"}},
-         "filled_size": "0", "average_filled_price": "0"},
-    ]})
+    rest.register(
+        "list_orders",
+        {
+            "orders": [
+                {
+                    "order_id": "o1",
+                    "client_order_id": "c1",
+                    "product_id": "BTC-USD",
+                    "side": "BUY",
+                    "status": "OPEN",
+                    "order_configuration": {
+                        "limit_limit_gtc": {"base_size": "0.5", "limit_price": "50000"}
+                    },
+                    "filled_size": "0",
+                    "average_filled_price": "0",
+                },
+            ]
+        },
+    )
     mixin = _TestableOrders(rest)
     orders = await mixin.get_open_orders("BTC-USD")
     assert len(orders) == 1

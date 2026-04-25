@@ -1,4 +1,5 @@
 """CoinbaseGateway — composition root for the Coinbase Advanced Trade connector."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

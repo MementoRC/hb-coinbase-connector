@@ -1,4 +1,5 @@
 """Tests for Coinbase enum schema types."""
+
 from coinbase_connector.schemas.enums import (
     CoinbaseGranularity,
     CoinbaseOrderSide,

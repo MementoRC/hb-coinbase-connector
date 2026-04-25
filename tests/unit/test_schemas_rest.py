@@ -1,4 +1,5 @@
 """Tests for Coinbase REST response schema models."""
+
 import json
 from pathlib import Path
 
@@ -57,10 +58,14 @@ class TestAccount:
         assert account.type == "ACCOUNT_TYPE_CRYPTO"
 
     def test_account_ignores_extra_fields(self):
-        data = {"uuid": "abc", "name": "Wallet", "currency": "ETH",
-                "available_balance": {"value": "1.0", "currency": "ETH"},
-                "hold": {"value": "0.0", "currency": "ETH"},
-                "extra_unknown_field": "ignored"}
+        data = {
+            "uuid": "abc",
+            "name": "Wallet",
+            "currency": "ETH",
+            "available_balance": {"value": "1.0", "currency": "ETH"},
+            "hold": {"value": "0.0", "currency": "ETH"},
+            "extra_unknown_field": "ignored",
+        }
         account = Account.model_validate(data)
         assert account.currency == "ETH"
 
@@ -69,9 +74,13 @@ class TestListAccountsResponse:
     def test_list_accounts_response(self):
         data = {
             "accounts": [
-                {"uuid": "abc", "name": "BTC Wallet", "currency": "BTC",
-                 "available_balance": {"value": "1.0", "currency": "BTC"},
-                 "hold": {"value": "0.0", "currency": "BTC"}}
+                {
+                    "uuid": "abc",
+                    "name": "BTC Wallet",
+                    "currency": "BTC",
+                    "available_balance": {"value": "1.0", "currency": "BTC"},
+                    "hold": {"value": "0.0", "currency": "BTC"},
+                }
             ],
             "has_next": False,
             "cursor": None,
@@ -128,6 +137,7 @@ class TestOrder:
 
     def test_order_enum_fields(self):
         from coinbase_connector.schemas.enums import CoinbaseOrderSide, CoinbaseOrderStatus
+
         data = json.loads((FIXTURES / "order.json").read_text())
         order = Order.model_validate(data)
         assert order.side == CoinbaseOrderSide.BUY
@@ -204,10 +214,16 @@ class TestFill:
 class TestListFillsResponse:
     def test_list_fills(self):
         fill_data = {
-            "entry_id": "fill-001", "trade_id": "t1", "order_id": "o1",
-            "trade_time": "2026-04-24T12:00:00Z", "trade_type": "FILL",
-            "price": "50000.00", "size": "0.01", "commission": "0.05",
-            "product_id": "BTC-USD", "side": "BUY",
+            "entry_id": "fill-001",
+            "trade_id": "t1",
+            "order_id": "o1",
+            "trade_time": "2026-04-24T12:00:00Z",
+            "trade_type": "FILL",
+            "price": "50000.00",
+            "size": "0.01",
+            "commission": "0.05",
+            "product_id": "BTC-USD",
+            "side": "BUY",
         }
         resp = ListFillsResponse.model_validate({"fills": [fill_data]})
         assert len(resp.fills) == 1
@@ -215,8 +231,14 @@ class TestListFillsResponse:
 
 class TestCandle:
     def test_candle_fields(self):
-        data = {"start": "1714003200", "low": "49800.00", "high": "50200.00",
-                "open": "50000.00", "close": "50100.00", "volume": "123.45"}
+        data = {
+            "start": "1714003200",
+            "low": "49800.00",
+            "high": "50200.00",
+            "open": "50000.00",
+            "close": "50100.00",
+            "volume": "123.45",
+        }
         candle = Candle.model_validate(data)
         assert candle.start == "1714003200"
         assert candle.low == "49800.00"

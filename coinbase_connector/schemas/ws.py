@@ -1,4 +1,5 @@
 """Coinbase Advanced Trade API WebSocket message schema models."""
+
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict

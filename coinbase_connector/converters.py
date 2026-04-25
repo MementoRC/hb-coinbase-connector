@@ -1,4 +1,5 @@
 """Pure conversion functions: Coinbase schemas → market-connector primitives."""
+
 from datetime import datetime
 from decimal import Decimal
 from typing import Any
@@ -111,9 +112,7 @@ def to_orderbook_snapshot(book: OrderBookResponse) -> OrderBookSnapshot:
 def to_orderbook_update(event: Level2Event, update_id: int) -> OrderBookUpdate:
     """Convert a Coinbase WS Level2Event to an OrderBookUpdate primitive."""
     bids = [
-        (Decimal(u.price_level), Decimal(u.new_quantity))
-        for u in event.updates
-        if u.side == "bid"
+        (Decimal(u.price_level), Decimal(u.new_quantity)) for u in event.updates if u.side == "bid"
     ]
     asks = [
         (Decimal(u.price_level), Decimal(u.new_quantity))

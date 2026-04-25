@@ -1,4 +1,5 @@
 """Tests for coinbase_connector.converters — pure conversion functions."""
+
 from decimal import Decimal
 
 from market_connector.primitives import OrderType, TradeType

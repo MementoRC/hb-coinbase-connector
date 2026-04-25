@@ -1,4 +1,5 @@
 """Contract compliance tests — subclass of GatewayContractTestBase."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

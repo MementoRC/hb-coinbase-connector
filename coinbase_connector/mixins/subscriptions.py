@@ -1,4 +1,5 @@
 """SubscriptionsMixin: WebSocket orderbook and trade subscriptions via Coinbase WS API."""
+
 from __future__ import annotations
 
 from contextlib import asynccontextmanager

@@ -1,4 +1,5 @@
 """Tests for AccountsMixin — Phase 6, Task 6.1."""
+
 from decimal import Decimal
 
 import pytest
@@ -22,16 +23,27 @@ class _TestableAccounts(AccountsMixin):
 @pytest.mark.asyncio
 async def test_get_balance_finds_currency():
     rest = MockRestClient()
-    rest.register("accounts", {
-        "accounts": [
-            {"uuid": "u1", "name": "BTC", "currency": "BTC",
-             "available_balance": {"value": "0.5", "currency": "BTC"},
-             "hold": {"value": "0", "currency": "BTC"}},
-            {"uuid": "u2", "name": "USD", "currency": "USD",
-             "available_balance": {"value": "1000", "currency": "USD"},
-             "hold": {"value": "0", "currency": "USD"}},
-        ],
-    })
+    rest.register(
+        "accounts",
+        {
+            "accounts": [
+                {
+                    "uuid": "u1",
+                    "name": "BTC",
+                    "currency": "BTC",
+                    "available_balance": {"value": "0.5", "currency": "BTC"},
+                    "hold": {"value": "0", "currency": "BTC"},
+                },
+                {
+                    "uuid": "u2",
+                    "name": "USD",
+                    "currency": "USD",
+                    "available_balance": {"value": "1000", "currency": "USD"},
+                    "hold": {"value": "0", "currency": "USD"},
+                },
+            ],
+        },
+    )
     mixin = _TestableAccounts(rest)
     assert await mixin.get_balance("BTC") == Decimal("0.5")
     assert await mixin.get_balance("USD") == Decimal("1000")

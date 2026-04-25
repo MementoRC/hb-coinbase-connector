@@ -1,4 +1,5 @@
 """Tests for Coinbase WS message schema models."""
+
 import json
 from pathlib import Path
 
@@ -35,11 +36,13 @@ class TestWsMessage:
         assert msg.sequence_num == 5
 
     def test_ws_message_defaults(self):
-        msg = WsMessage.model_validate({
-            "channel": "ticker",
-            "timestamp": "2026-04-24T12:00:00Z",
-            "events": [],
-        })
+        msg = WsMessage.model_validate(
+            {
+                "channel": "ticker",
+                "timestamp": "2026-04-24T12:00:00Z",
+                "events": [],
+            }
+        )
         assert msg.client_id == ""
         assert msg.sequence_num == 0
 
@@ -64,8 +67,12 @@ class TestWsMessage:
 
 class TestLevel2Update:
     def test_level2_update_fields(self):
-        data = {"side": "bid", "event_time": "2026-04-24T12:00:00Z",
-                "price_level": "50000.00", "new_quantity": "0.5"}
+        data = {
+            "side": "bid",
+            "event_time": "2026-04-24T12:00:00Z",
+            "price_level": "50000.00",
+            "new_quantity": "0.5",
+        }
         update = Level2Update.model_validate(data)
         assert update.side == "bid"
         assert update.price_level == "50000.00"

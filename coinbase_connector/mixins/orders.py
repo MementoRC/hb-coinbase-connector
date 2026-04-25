@@ -1,4 +1,5 @@
 """OrdersMixin: order placement, cancellation, and open-order listing via Coinbase REST API."""
+
 from __future__ import annotations
 
 import uuid
@@ -82,9 +83,7 @@ class OrdersMixin:
         # This implementation accepts client_order_id directly for the simple case where the
         # caller tracks the mapping. A follow-up should add a client→exchange ID map
         # populated by place_order and consumed here.
-        raw = await self._rest.request(
-            "cancel_orders", data={"order_ids": [client_order_id]}
-        )
+        raw = await self._rest.request("cancel_orders", data={"order_ids": [client_order_id]})
         response = CancelOrdersResponse.model_validate(raw)
         return all(r.success for r in response.results)
 

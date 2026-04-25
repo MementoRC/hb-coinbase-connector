@@ -1,4 +1,5 @@
 """Tests for SubscriptionsMixin — Phase 6, Task 6.4."""
+
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -36,14 +37,25 @@ async def test_subscribe_trades_invokes_callback():
 
     async with await mixin.subscribe_trades("BTC-USD", received.append):
         # Simulate WS message delivery
-        captured_cb["cb"]({
-            "events": [{
-                "type": "update",
-                "trades": [{"trade_id": "t1", "product_id": "BTC-USD",
-                            "price": "50000", "size": "0.5", "side": "BUY",
-                            "time": "2026-04-24T12:00:00Z"}],
-            }],
-        })
+        captured_cb["cb"](
+            {
+                "events": [
+                    {
+                        "type": "update",
+                        "trades": [
+                            {
+                                "trade_id": "t1",
+                                "product_id": "BTC-USD",
+                                "price": "50000",
+                                "size": "0.5",
+                                "side": "BUY",
+                                "time": "2026-04-24T12:00:00Z",
+                            }
+                        ],
+                    }
+                ],
+            }
+        )
 
     assert len(received) == 1
     assert received[0].exchange_trade_id == "t1"
