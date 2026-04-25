@@ -9,6 +9,9 @@ pyjwt = ">=2.8"
 cryptography = ">=41"
 aiohttp = ">=3.9"
 
+[pypi-dependencies]
+hb-market-connector = { path = "../market-connector", editable = true }
+
 [feature.dev.dependencies]
 pytest = ">=9.0.3"
 pytest-asyncio = ">=0.21.0"
