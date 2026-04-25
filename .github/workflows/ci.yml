@@ -1,3 +1,4 @@
+# .github/workflows/ci.yml
 name: CI
 
 on:
@@ -31,7 +32,7 @@ jobs:
       enable-hygiene-check: true
       editable-install: true
       package-path: "."
-      allowed-licenses: "MIT, Apache-2.0, BSD-3-Clause, BSD-2-Clause, ISC"
+      allowed-licenses: "MIT, Apache-2.0, BSD-3-Clause, BSD-2-Clause, ISC, PSF-2.0, LGPL-3.0"
 
   branch-policy:
     name: "Branch Policy"
@@ -41,12 +42,12 @@ jobs:
       - name: Check source branch
         run: |
           if [ "${{ github.head_ref }}" != "development" ]; then
-            echo "PRs to main must come from development branch"
+            echo "❌ PRs to main must come from development branch"
             echo "   Source: ${{ github.head_ref }}"
             echo "   Expected: development"
             exit 1
           fi
-          echo "PR from development to main - allowed"
+          echo "✅ PR from development to main - allowed"
 
   security-scanning:
     name: "Security Scanning"

@@ -6,10 +6,14 @@ build-backend = "hatchling.build"
 name = "hb-coinbase-connector"
 dynamic = ["version"]
 description = "Coinbase Advanced Trade connector for Hummingbot — exchange-specific adapter implementing market-connector protocols"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = {text = "Apache-2.0"}
 dependencies = [
-    "aiohttp>=3.8.0",
+    "pydantic>=2.0",
+    "pyjwt>=2.8",
+    "cryptography>=41",
+    "aiohttp>=3.9",
+    "hb-market-connector @ file:../market-connector",
 ]
 
 [project.optional-dependencies]
@@ -42,7 +46,7 @@ timeout = 30
 addopts = "--strict-markers --strict-config -v"
 
 [tool.ruff]
-target-version = "py310"
+target-version = "py311"
 line-length = 100
 
 [tool.ruff.lint]
@@ -52,7 +56,7 @@ select = ["E", "F", "I", "W", "B", "UP", "N", "SIM", "TCH"]
 quote-style = "double"
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.11"
 strict = true
 warn_return_any = true
 warn_unused_configs = true
