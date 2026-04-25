@@ -1,8 +1,5 @@
 """Coinbase Advanced Trade API REST response schema models."""
-from __future__ import annotations
-
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -42,13 +39,13 @@ class Account(_FrozenBase):
     default: bool = False
     active: bool = True
     ready: bool = True
-    type: Optional[str] = None
+    type: str | None = None
 
 
 class ListAccountsResponse(_FrozenBase):
     accounts: list[Account]
     has_next: bool = False
-    cursor: Optional[str] = None
+    cursor: str | None = None
     size: int = 0
 
 
@@ -58,8 +55,8 @@ class ListAccountsResponse(_FrozenBase):
 
 
 class MarketIOCConfig(_FrozenBase):
-    quote_size: Optional[str] = None
-    base_size: Optional[str] = None
+    quote_size: str | None = None
+    base_size: str | None = None
 
 
 class LimitGTCConfig(_FrozenBase):
@@ -80,10 +77,10 @@ class StopLimitGTCConfig(_FrozenBase):
 
 
 class OrderConfiguration(_FrozenBase):
-    market_market_ioc: Optional[MarketIOCConfig] = None
-    limit_limit_gtc: Optional[LimitGTCConfig] = None
-    limit_limit_gtd: Optional[LimitGTDConfig] = None
-    stop_limit_stop_limit_gtc: Optional[StopLimitGTCConfig] = None
+    market_market_ioc: MarketIOCConfig | None = None
+    limit_limit_gtc: LimitGTCConfig | None = None
+    limit_limit_gtd: LimitGTDConfig | None = None
+    stop_limit_stop_limit_gtc: StopLimitGTCConfig | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -95,12 +92,12 @@ class Order(_FrozenBase):
     order_id: str
     client_order_id: str
     product_id: str
-    user_id: Optional[str] = None
-    order_configuration: Optional[OrderConfiguration] = None
+    user_id: str | None = None
+    order_configuration: OrderConfiguration | None = None
     side: CoinbaseOrderSide
     status: CoinbaseOrderStatus
-    time_in_force: Optional[CoinbaseTimeInForce] = None
-    created_time: Optional[datetime] = None
+    time_in_force: CoinbaseTimeInForce | None = None
+    created_time: datetime | None = None
     filled_size: str = "0"
     average_filled_price: str = "0"
     total_fees: str = "0"
@@ -109,8 +106,8 @@ class Order(_FrozenBase):
     number_of_fills: str = "0"
     pending_cancel: bool = False
     settled: bool = False
-    reject_reason: Optional[str] = None
-    order_type: Optional[CoinbaseOrderType] = None
+    reject_reason: str | None = None
+    order_type: CoinbaseOrderType | None = None
 
 
 class CreateOrderSuccess(_FrozenBase):
@@ -122,14 +119,14 @@ class CreateOrderSuccess(_FrozenBase):
 
 class CreateOrderResponse(_FrozenBase):
     success: bool
-    order_id: Optional[str] = None
-    failure_reason: Optional[str] = None
-    success_response: Optional[CreateOrderSuccess] = None
+    order_id: str | None = None
+    failure_reason: str | None = None
+    success_response: CreateOrderSuccess | None = None
 
 
 class CancelOrderResult(_FrozenBase):
     success: bool
-    failure_reason: Optional[str] = None
+    failure_reason: str | None = None
     order_id: str
 
 
@@ -139,9 +136,9 @@ class CancelOrdersResponse(_FrozenBase):
 
 class ListOrdersResponse(_FrozenBase):
     orders: list[Order]
-    sequence: Optional[str] = None
+    sequence: str | None = None
     has_next: bool = False
-    cursor: Optional[str] = None
+    cursor: str | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -159,13 +156,13 @@ class Fill(_FrozenBase):
     size: str
     commission: str
     product_id: str
-    liquidity_indicator: Optional[str] = None
+    liquidity_indicator: str | None = None
     side: CoinbaseOrderSide
 
 
 class ListFillsResponse(_FrozenBase):
     fills: list[Fill]
-    cursor: Optional[str] = None
+    cursor: str | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -183,7 +180,7 @@ class Product(_FrozenBase):
     base_max_size: str
     quote_min_size: str
     quote_max_size: str
-    status: Optional[str] = None
+    status: str | None = None
     trading_disabled: bool = False
     is_disabled: bool = False
     new: bool = False
@@ -191,9 +188,9 @@ class Product(_FrozenBase):
     limit_only: bool = False
     post_only: bool = False
     auction_mode: bool = False
-    product_type: Optional[str] = None
-    price: Optional[str] = None
-    volume_24h: Optional[str] = Field(default=None, alias="volume_24h")
+    product_type: str | None = None
+    price: str | None = None
+    volume_24h: str | None = Field(default=None, alias="volume_24h")
 
 
 class ListProductsResponse(_FrozenBase):
@@ -233,7 +230,7 @@ class PriceBook(_FrozenBase):
     product_id: str
     bids: list[OrderBookLevel]
     asks: list[OrderBookLevel]
-    time: Optional[datetime] = None
+    time: datetime | None = None
 
 
 class OrderBookResponse(_FrozenBase):
@@ -246,6 +243,8 @@ class OrderBookResponse(_FrozenBase):
 
 
 class ServerTimeResponse(_FrozenBase):
+    model_config = ConfigDict(frozen=True, extra="ignore", populate_by_name=True)
+
     iso: str
-    epochSeconds: str
-    epochMillis: str
+    epoch_seconds: str = Field(alias="epochSeconds")
+    epoch_millis: str = Field(alias="epochMillis")

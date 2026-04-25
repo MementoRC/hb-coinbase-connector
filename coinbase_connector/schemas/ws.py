@@ -1,7 +1,5 @@
 """Coinbase Advanced Trade API WebSocket message schema models."""
-from __future__ import annotations
-
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 
@@ -63,7 +61,7 @@ class UserOrder(_FrozenBase):
     status: str
     creation_time: str
     order_side: str
-    order_type: Optional[str] = None
+    order_type: str | None = None
 
 
 class UserEvent(_FrozenBase):

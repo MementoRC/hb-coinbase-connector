@@ -44,9 +44,11 @@ class TestWsMessage:
         assert msg.sequence_num == 0
 
     def test_ws_message_is_frozen(self):
+        from pydantic import ValidationError  # noqa: PLC0415
+
         data = json.loads((FIXTURES / "level2_snapshot.json").read_text())
         msg = WsMessage.model_validate(data)
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             msg.channel = "changed"  # type: ignore[misc]
 
     def test_ws_message_ignores_extra_fields(self):

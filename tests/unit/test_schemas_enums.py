@@ -1,12 +1,12 @@
 """Tests for Coinbase enum schema types."""
 from coinbase_connector.schemas.enums import (
-    CoinbaseOrderStatus,
-    CoinbaseOrderSide,
-    CoinbaseOrderType,
     CoinbaseGranularity,
-    CoinbaseWsChannel,
-    CoinbaseTimeInForce,
+    CoinbaseOrderSide,
+    CoinbaseOrderStatus,
+    CoinbaseOrderType,
     CoinbaseProductType,
+    CoinbaseTimeInForce,
+    CoinbaseWsChannel,
     CoinbaseWsEventType,
 )
 

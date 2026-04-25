@@ -7,9 +7,9 @@ import pytest
 from coinbase_connector.schemas.rest import (
     Account,
     Balance,
+    CancelOrdersResponse,
     Candle,
     CreateOrderResponse,
-    CancelOrdersResponse,
     Fill,
     GetProductCandlesResponse,
     ListAccountsResponse,
@@ -33,8 +33,10 @@ class TestBalance:
         assert b.currency == "BTC"
 
     def test_balance_is_frozen(self):
+        from pydantic import ValidationError  # noqa: PLC0415
+
         b = Balance.model_validate({"value": "1.0", "currency": "USD"})
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             b.value = "2.0"  # type: ignore[misc]
 
 
@@ -246,7 +248,12 @@ class TestOrderBook:
 
 class TestServerTimeResponse:
     def test_server_time(self):
-        data = {"iso": "2026-04-24T12:00:00Z", "epochSeconds": "1714003200", "epochMillis": "1714003200000"}
+        data = {
+            "iso": "2026-04-24T12:00:00Z",
+            "epochSeconds": "1714003200",
+            "epochMillis": "1714003200000",
+        }
         resp = ServerTimeResponse.model_validate(data)
         assert resp.iso == "2026-04-24T12:00:00Z"
-        assert resp.epochSeconds == "1714003200"
+        assert resp.epoch_seconds == "1714003200"
+        assert resp.epoch_millis == "1714003200000"
