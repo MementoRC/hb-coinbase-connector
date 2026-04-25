@@ -2,6 +2,8 @@
 
 import jwt as pyjwt
 import pytest
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.serialization import load_pem_private_key
 
 from coinbase_connector.auth import _build_jwt, _hmac_sign, _normalize_pem, coinbase_auth
 
@@ -44,6 +46,27 @@ class TestBuildJwt:
         headers = pyjwt.get_unverified_header(token)
         assert headers["kid"] == "test-key"
         assert "nonce" in headers and len(headers["nonce"]) > 0
+
+    def test_es256_signature_round_trip(self, ec_private_pem: str) -> None:
+        """ES256 signature must verify against the corresponding public key."""
+        token = _build_jwt(
+            api_key="test-key", pem=ec_private_pem, uri="GET api.coinbase.com/v3/test"
+        )
+        private_key = load_pem_private_key(ec_private_pem.encode(), password=None)
+        public_key_pem = private_key.public_key().public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo,
+        )
+        decoded = pyjwt.decode(
+            token,
+            public_key_pem,
+            algorithms=["ES256"],
+            audience=["cdp"],
+            options={"verify_aud": True},
+        )
+        assert decoded["sub"] == "test-key"
+        assert decoded["iss"] == "cdp"
+        assert decoded["aud"] == ["cdp"]
 
 
 class TestHmacSign:
