@@ -3,7 +3,7 @@
 import pytest
 import jwt as pyjwt
 
-from coinbase_connector.auth import _build_jwt, _hmac_sign, _normalize_pem
+from coinbase_connector.auth import _build_jwt, _hmac_sign, _normalize_pem, coinbase_auth
 
 
 class TestNormalizePem:
@@ -53,3 +53,31 @@ class TestHmacSign:
         msg = "1234567890GET/v3/orders"
         assert _hmac_sign("secret", msg) == _hmac_sign("secret", msg)
         assert _hmac_sign("secret", msg) != _hmac_sign("secret2", msg)
+
+
+class TestCoinbaseAuth:
+    async def test_rest_jwt_returns_bearer_header(self, ec_private_pem: str) -> None:
+        auth = coinbase_auth(api_key="k1", secret_key=ec_private_pem)
+        result = await auth({"method": "GET", "path": "/brokerage/orders", "body": "", "context": "rest"})
+        assert "Authorization" in result
+        assert result["Authorization"].startswith("Bearer ")
+        assert result["content-type"] == "application/json"
+
+    async def test_rest_hmac_fallback(self) -> None:
+        auth = coinbase_auth(api_key="k1", secret_key="raw_hmac_secret_not_pem")
+        result = await auth({"method": "GET", "path": "/brokerage/orders", "body": "", "context": "rest"})
+        assert "CB-ACCESS-KEY" in result
+        assert "CB-ACCESS-SIGN" in result
+        assert "CB-ACCESS-TIMESTAMP" in result
+
+    async def test_ws_jwt_returns_jwt_field(self, ec_private_pem: str) -> None:
+        auth = coinbase_auth(api_key="k1", secret_key=ec_private_pem)
+        result = await auth({"context": "ws", "channel": "level2", "product_ids": ["BTC-USD"]})
+        assert "jwt" in result
+
+    async def test_ws_hmac_fallback(self) -> None:
+        auth = coinbase_auth(api_key="k1", secret_key="raw_hmac_secret")
+        result = await auth({"context": "ws", "channel": "level2", "product_ids": ["BTC-USD"]})
+        assert result["api_key"] == "k1"
+        assert "signature" in result
+        assert "timestamp" in result

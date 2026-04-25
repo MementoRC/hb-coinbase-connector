@@ -8,6 +8,7 @@ import hmac as _hmac_lib
 import secrets
 import textwrap
 import time
+from collections.abc import Awaitable, Callable
 from typing import Any
 
 import jwt
@@ -84,3 +85,67 @@ def _build_jwt(api_key: str, pem: str, uri: str | None = None) -> str:
 def _hmac_sign(secret: str, message: str) -> str:
     """Return the HMAC-SHA256 hex digest of ``message`` keyed with ``secret``."""
     return _hmac_lib.new(secret.encode(), message.encode(), hashlib.sha256).hexdigest()
+
+
+_BASE_HOST = "api.coinbase.com"
+_USER_AGENT = "hb-coinbase-connector/0.1.0"
+
+AuthCallable = Callable[[dict[str, Any]], Awaitable[dict[str, str]]]
+
+
+def coinbase_auth(api_key: str, secret_key: str) -> AuthCallable:
+    """Return an async AuthCallable. Attempts JWT (EC key); falls back to HMAC.
+
+    The returned callable accepts a context dict and returns auth headers/fields:
+
+    - REST JWT:  ``{"Authorization": "Bearer <token>", "content-type": ..., "User-Agent": ...}``
+    - REST HMAC: ``{"CB-ACCESS-KEY": ..., "CB-ACCESS-SIGN": ..., "CB-ACCESS-TIMESTAMP": ..., ...}``
+    - WS JWT:    ``{"jwt": "<token>"}``
+    - WS HMAC:   ``{"api_key": ..., "signature": ..., "timestamp": ...}``
+    """
+    try:
+        pem: str | None = _normalize_pem(secret_key)
+        use_jwt = True
+    except ValueError:
+        pem = None
+        use_jwt = False
+
+    async def _auth(ctx: dict[str, Any]) -> dict[str, str]:
+        context = ctx.get("context", "rest")
+
+        if context == "rest":
+            method: str = ctx["method"]
+            path: str = ctx["path"]
+            body: str = ctx.get("body", "")
+
+            if use_jwt:
+                uri = f"{method} {_BASE_HOST}{path}"
+                token = _build_jwt(api_key, pem, uri=uri)  # type: ignore[arg-type]
+                return {
+                    "content-type": "application/json",
+                    "Authorization": f"Bearer {token}",
+                    "User-Agent": _USER_AGENT,
+                }
+            else:
+                ts = str(int(time.time()))
+                sig = _hmac_sign(secret_key, ts + method + path + body)
+                return {
+                    "content-type": "application/json",
+                    "CB-ACCESS-KEY": api_key,
+                    "CB-ACCESS-SIGN": sig,
+                    "CB-ACCESS-TIMESTAMP": ts,
+                    "User-Agent": _USER_AGENT,
+                }
+
+        if context == "ws":
+            if use_jwt:
+                return {"jwt": _build_jwt(api_key, pem, uri=None)}  # type: ignore[arg-type]
+            ts = str(int(time.time()))
+            channel: str = ctx["channel"]
+            products: str = ",".join(ctx["product_ids"])
+            sig = _hmac_sign(secret_key, ts + channel + products)
+            return {"api_key": api_key, "signature": sig, "timestamp": ts}
+
+        raise ValueError(f"Unknown auth context: {context!r}")
+
+    return _auth
