@@ -43,11 +43,7 @@ def _normalize_pem(secret_key: str) -> str:
         raise ValueError("The secret key is not a valid base64 string.") from exc
 
     wrapped = textwrap.wrap(key, width=64)
-    pem = (
-        "-----BEGIN EC PRIVATE KEY-----\n"
-        + "\n".join(wrapped)
-        + "\n-----END EC PRIVATE KEY-----"
-    )
+    pem = "-----BEGIN EC PRIVATE KEY-----\n" + "\n".join(wrapped) + "\n-----END EC PRIVATE KEY-----"
     serialization.load_pem_private_key(pem.encode(), password=None, backend=default_backend())
     return pem
 

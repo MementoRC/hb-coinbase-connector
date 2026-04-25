@@ -15,10 +15,12 @@ from __future__ import annotations
 
 import json
 from collections.abc import Awaitable, Callable
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from market_connector.transport.endpoint import Endpoint
 from market_connector.transport.rest_base import RestConnectorBase
+
+if TYPE_CHECKING:
+    from market_connector.transport.endpoint import Endpoint
 
 # Signer takes full request context and returns auth headers to merge.
 Signer = Callable[[dict[str, Any]], Awaitable[dict[str, str]]]

@@ -1,8 +1,8 @@
 """Shared test fixtures for coinbase_connector tests."""
 
 import pytest
-from cryptography.hazmat.primitives.asymmetric.ec import SECP256R1, generate_private_key
 from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.ec import SECP256R1, generate_private_key
 
 
 @pytest.fixture

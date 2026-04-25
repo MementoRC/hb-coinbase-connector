@@ -1,7 +1,7 @@
 """Tests for coinbase_connector.auth — Phase 1."""
 
-import pytest
 import jwt as pyjwt
+import pytest
 
 from coinbase_connector.auth import _build_jwt, _hmac_sign, _normalize_pem, coinbase_auth
 
@@ -23,7 +23,9 @@ class TestNormalizePem:
 
 class TestBuildJwt:
     def test_includes_required_claims(self, ec_private_pem: str) -> None:
-        token = _build_jwt(api_key="test-key", pem=ec_private_pem, uri="GET api.coinbase.com/v3/test")
+        token = _build_jwt(
+            api_key="test-key", pem=ec_private_pem, uri="GET api.coinbase.com/v3/test"
+        )
         decoded = pyjwt.decode(token, options={"verify_signature": False})
         assert decoded["sub"] == "test-key"
         assert decoded["iss"] == "cdp"
@@ -58,14 +60,18 @@ class TestHmacSign:
 class TestCoinbaseAuth:
     async def test_rest_jwt_returns_bearer_header(self, ec_private_pem: str) -> None:
         auth = coinbase_auth(api_key="k1", secret_key=ec_private_pem)
-        result = await auth({"method": "GET", "path": "/brokerage/orders", "body": "", "context": "rest"})
+        result = await auth(
+            {"method": "GET", "path": "/brokerage/orders", "body": "", "context": "rest"}
+        )
         assert "Authorization" in result
         assert result["Authorization"].startswith("Bearer ")
         assert result["content-type"] == "application/json"
 
     async def test_rest_hmac_fallback(self) -> None:
         auth = coinbase_auth(api_key="k1", secret_key="raw_hmac_secret_not_pem")
-        result = await auth({"method": "GET", "path": "/brokerage/orders", "body": "", "context": "rest"})
+        result = await auth(
+            {"method": "GET", "path": "/brokerage/orders", "body": "", "context": "rest"}
+        )
         assert "CB-ACCESS-KEY" in result
         assert "CB-ACCESS-SIGN" in result
         assert "CB-ACCESS-TIMESTAMP" in result

@@ -1,7 +1,6 @@
 """Tests for coinbase_connector.transport — Phase 1, Step 5."""
 
 import pytest
-
 from market_connector.transport.endpoint import Endpoint
 from market_connector.transport.rest_base import RestConnectorBase
 
@@ -39,7 +38,9 @@ class TestCoinbaseRestClient:
         assert captured[0]["path"] == "/brokerage/accounts"
         assert result["headers_received"]["Authorization"] == "Bearer test-token"
 
-    async def test_resolves_path_params_before_signing(self, monkeypatch: pytest.MonkeyPatch) -> None:
+    async def test_resolves_path_params_before_signing(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         """Path parameters like {order_id} are substituted before signing."""
         captured: list[dict] = []
 
