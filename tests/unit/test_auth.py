@@ -3,7 +3,7 @@
 import pytest
 import jwt as pyjwt
 
-from coinbase_connector.auth import _build_jwt, _normalize_pem
+from coinbase_connector.auth import _build_jwt, _hmac_sign, _normalize_pem
 
 
 class TestNormalizePem:
@@ -41,3 +41,15 @@ class TestBuildJwt:
         headers = pyjwt.get_unverified_header(token)
         assert headers["kid"] == "test-key"
         assert "nonce" in headers and len(headers["nonce"]) > 0
+
+
+class TestHmacSign:
+    def test_produces_hex_digest(self) -> None:
+        result = _hmac_sign(secret="secret", message="1234567890GET/v3/orders")
+        assert len(result) == 64  # SHA-256 hex = 32 bytes = 64 hex chars
+        assert all(c in "0123456789abcdef" for c in result)
+
+    def test_deterministic(self) -> None:
+        msg = "1234567890GET/v3/orders"
+        assert _hmac_sign("secret", msg) == _hmac_sign("secret", msg)
+        assert _hmac_sign("secret", msg) != _hmac_sign("secret2", msg)

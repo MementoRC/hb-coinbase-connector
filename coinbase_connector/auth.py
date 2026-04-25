@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import binascii
+import hashlib
+import hmac as _hmac_lib
 import secrets
 import textwrap
 import time
@@ -77,3 +79,8 @@ def _build_jwt(api_key: str, pem: str, uri: str | None = None) -> str:
         algorithm="ES256",
         headers={"kid": api_key, "nonce": secrets.token_hex()},
     )
+
+
+def _hmac_sign(secret: str, message: str) -> str:
+    """Return the HMAC-SHA256 hex digest of ``message`` keyed with ``secret``."""
+    return _hmac_lib.new(secret.encode(), message.encode(), hashlib.sha256).hexdigest()
