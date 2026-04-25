@@ -29,6 +29,9 @@ dev = [
 [tool.hatch.version]
 path = "coinbase_connector/__about__.py"
 
+[tool.hatch.metadata]
+allow-direct-references = true
+
 [tool.hatch.build.targets.wheel]
 packages = ["coinbase_connector"]
 
