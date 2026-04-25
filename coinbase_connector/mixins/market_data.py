@@ -2,18 +2,21 @@
 from __future__ import annotations
 
 from decimal import Decimal
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from market_connector.exceptions import GatewayNotStartedError
-from market_connector.primitives import OrderBookSnapshot
 
 from coinbase_connector.converters import (
     to_candle,
     to_exchange_pair,
     to_orderbook_snapshot,
 )
-from coinbase_connector.mixins.protocols import HasReady, HasRest
 from coinbase_connector.schemas.rest import GetProductCandlesResponse, OrderBookResponse
+
+if TYPE_CHECKING:
+    from market_connector.primitives import OrderBookSnapshot
+
+    from coinbase_connector.mixins.protocols import HasReady, HasRest
 
 
 class MarketDataMixin:
@@ -32,7 +35,12 @@ class MarketDataMixin:
         ask: Decimal = book.asks[0][0]
         return (bid + ask) / 2
 
-    async def get_candles(self: HasRest & HasReady, trading_pair: str, interval: str, limit: int) -> list[Any]:  # type: ignore[valid-type]
+    async def get_candles(
+        self: HasRest & HasReady,  # type: ignore[valid-type]
+        trading_pair: str,
+        interval: str,
+        limit: int,
+    ) -> list[Any]:
         if not self.ready:
             raise GatewayNotStartedError("Gateway not started")
         product_id = to_exchange_pair(trading_pair)

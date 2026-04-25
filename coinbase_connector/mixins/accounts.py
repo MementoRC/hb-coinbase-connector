@@ -2,12 +2,15 @@
 from __future__ import annotations
 
 from decimal import Decimal
+from typing import TYPE_CHECKING
 
 from market_connector.exceptions import GatewayNotStartedError
 
 from coinbase_connector.converters import to_balance
-from coinbase_connector.mixins.protocols import HasReady, HasRest
 from coinbase_connector.schemas.rest import ListAccountsResponse
+
+if TYPE_CHECKING:
+    from coinbase_connector.mixins.protocols import HasReady, HasRest
 
 
 class AccountsMixin:

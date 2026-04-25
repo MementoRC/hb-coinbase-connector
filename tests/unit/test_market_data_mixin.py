@@ -1,7 +1,10 @@
 """Tests for MarketDataMixin — Phase 6, Task 6.2."""
-import pytest
 from decimal import Decimal
+
+import pytest
+from market_connector.exceptions import GatewayNotStartedError
 from market_connector.testing.mock_transport import MockRestClient
+
 from coinbase_connector.mixins.market_data import MarketDataMixin
 
 
@@ -62,5 +65,5 @@ async def test_get_orderbook_not_ready_raises():
     rest = MockRestClient()
     mixin = _TestableMarket(rest)
     mixin._started = False
-    with pytest.raises(Exception):
+    with pytest.raises(GatewayNotStartedError):
         await mixin.get_orderbook("BTC-USD")

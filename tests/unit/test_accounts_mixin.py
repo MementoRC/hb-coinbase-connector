@@ -1,7 +1,10 @@
 """Tests for AccountsMixin — Phase 6, Task 6.1."""
-import pytest
 from decimal import Decimal
+
+import pytest
+from market_connector.exceptions import GatewayNotStartedError
 from market_connector.testing.mock_transport import MockRestClient
+
 from coinbase_connector.mixins.accounts import AccountsMixin
 
 
@@ -47,5 +50,5 @@ async def test_get_balance_not_ready_raises():
     rest = MockRestClient()
     mixin = _TestableAccounts(rest)
     mixin._started = False
-    with pytest.raises(Exception):
+    with pytest.raises(GatewayNotStartedError):
         await mixin.get_balance("BTC")
