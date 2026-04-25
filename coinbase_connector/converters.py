@@ -1,5 +1,5 @@
 """Pure conversion functions: Coinbase schemas → market-connector primitives."""
-from datetime import datetime, timezone
+from datetime import datetime
 from decimal import Decimal
 
 from market_connector.primitives import (
@@ -19,7 +19,6 @@ from coinbase_connector.schemas.rest import (
     OrderConfiguration,
 )
 from coinbase_connector.schemas.ws import Level2Event, MarketTrade
-
 
 # ---------------------------------------------------------------------------
 # 4.1  Pair passthrough
