@@ -65,6 +65,7 @@ def _build_jwt(api_key: str, pem: str, uri: str | None = None) -> str:
     claims: dict[str, Any] = {
         "sub": api_key,
         "iss": "cdp",
+        "aud": ["cdp"],
         "nbf": now,
         "exp": now + 120,
     }

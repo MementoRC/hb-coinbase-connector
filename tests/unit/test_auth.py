@@ -29,6 +29,7 @@ class TestBuildJwt:
         decoded = pyjwt.decode(token, options={"verify_signature": False})
         assert decoded["sub"] == "test-key"
         assert decoded["iss"] == "cdp"
+        assert decoded["aud"] == ["cdp"]
         assert decoded["uri"] == "GET api.coinbase.com/v3/test"
         assert "nbf" in decoded and "exp" in decoded
         assert decoded["exp"] - decoded["nbf"] == 120
