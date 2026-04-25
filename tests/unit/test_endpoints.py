@@ -22,7 +22,7 @@ def test_registry_contains_required_endpoints() -> None:
     assert required.issubset(ENDPOINT_REGISTRY.keys())
 
 
-def test_endpoint_is_Endpoint_type() -> None:
+def test_endpoint_is_endpoint_type() -> None:
     for name, ep in ENDPOINT_REGISTRY.items():
         assert isinstance(ep, Endpoint), f"{name} is not an Endpoint"
 
