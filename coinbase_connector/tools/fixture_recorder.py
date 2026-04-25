@@ -17,9 +17,8 @@ import re
 from pathlib import Path
 from typing import Any
 
-from coinbase_connector.config import CoinbaseConfig
 from coinbase_connector.coinbase_gateway import CoinbaseGateway
-
+from coinbase_connector.config import CoinbaseConfig
 
 _UUID_RE = re.compile(r"\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b")
 
