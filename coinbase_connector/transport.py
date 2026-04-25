@@ -38,6 +38,8 @@ class CoinbaseRestClient(RestConnectorBase):
         max_retries: int = 3,
         retry_delay: float = 1.0,
     ) -> None:
+        if not base_url.startswith("https://"):
+            raise ValueError(f"base_url must use https:// (got {base_url!r})")
         super().__init__(
             base_url,
             endpoints=endpoints,

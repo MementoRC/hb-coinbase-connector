@@ -38,6 +38,22 @@ class TestCoinbaseRestClient:
         assert captured[0]["path"] == "/brokerage/accounts"
         assert result["headers_received"]["Authorization"] == "Bearer test-token"
 
+    def test_rejects_non_https_base_url(self) -> None:
+        """CoinbaseRestClient must reject http:// base URLs."""
+        endpoints = {
+            "accounts": Endpoint(path="/brokerage/accounts", method="GET", limit=30, window=1.0),
+        }
+
+        async def fake_signer(ctx: dict) -> dict[str, str]:
+            return {}
+
+        with pytest.raises(ValueError, match="https://"):
+            CoinbaseRestClient(
+                base_url="http://api.coinbase.com/api/v3",
+                endpoints=endpoints,
+                signer=fake_signer,
+            )
+
     async def test_resolves_path_params_before_signing(
         self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
