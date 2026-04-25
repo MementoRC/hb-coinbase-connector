@@ -9,11 +9,14 @@ import secrets
 import textwrap
 import time
 from collections.abc import Awaitable, Callable
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import jwt
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
+
+if TYPE_CHECKING:
+    from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
 
 
 def _normalize_pem(secret_key: str) -> str:
@@ -60,7 +63,9 @@ def _build_jwt(api_key: str, pem: str, uri: str | None = None) -> str:
     Returns:
         A signed JWT string.
     """
-    private_key = serialization.load_pem_private_key(pem.encode(), password=None)
+    private_key: EllipticCurvePrivateKey = serialization.load_pem_private_key(  # type: ignore[assignment]
+        pem.encode(), password=None
+    )
     now = int(time.time())
     claims: dict[str, Any] = {
         "sub": api_key,

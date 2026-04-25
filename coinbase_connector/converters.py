@@ -1,6 +1,7 @@
 """Pure conversion functions: Coinbase schemas → market-connector primitives."""
 from datetime import datetime
 from decimal import Decimal
+from typing import Any
 
 from market_connector.primitives import (
     OpenOrder,
@@ -65,8 +66,8 @@ def _extract_order_details(cfg: OrderConfiguration) -> tuple[OrderType, Decimal,
         c = cfg.limit_limit_gtd
         return OrderType.LIMIT, Decimal(c.base_size), Decimal(c.limit_price)
     if cfg.market_market_ioc is not None:
-        c = cfg.market_market_ioc
-        size = c.base_size or c.quote_size or "0"
+        mc = cfg.market_market_ioc
+        size = mc.base_size or mc.quote_size or "0"
         return OrderType.MARKET, Decimal(size), Decimal("0")
     raise ValueError("Unsupported order configuration")
 
@@ -145,7 +146,7 @@ def to_trade_event(trade: MarketTrade) -> TradeEvent:
     )
 
 
-def to_candle(candle: Candle) -> list:
+def to_candle(candle: Candle) -> list[Any]:
     """Convert a Coinbase REST Candle to OHLCV list: [timestamp, open, high, low, close, volume]."""
     return [
         int(candle.start),
