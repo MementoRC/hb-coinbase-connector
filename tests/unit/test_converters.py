@@ -3,8 +3,25 @@ from decimal import Decimal
 
 from market_connector.primitives import OrderType, TradeType
 
-from coinbase_connector.converters import from_exchange_pair, to_balance, to_exchange_pair, to_open_order
-from coinbase_connector.schemas.rest import Account, Balance, LimitGTCConfig, Order, OrderConfiguration
+from coinbase_connector.converters import (
+    from_exchange_pair,
+    to_balance,
+    to_exchange_pair,
+    to_open_order,
+    to_orderbook_snapshot,
+    to_orderbook_update,
+)
+from coinbase_connector.schemas.rest import (
+    Account,
+    Balance,
+    LimitGTCConfig,
+    Order,
+    OrderBookLevel,
+    OrderBookResponse,
+    OrderConfiguration,
+    PriceBook,
+)
+from coinbase_connector.schemas.ws import Level2Event, Level2Update
 
 
 def test_to_exchange_pair_passthrough():
@@ -58,3 +75,38 @@ def test_to_open_order_from_limit():
     assert result.price == Decimal("50000")
     assert result.filled_amount == Decimal("0.1")
     assert result.order_type == OrderType.LIMIT
+
+
+# ---------------------------------------------------------------------------
+# 4.4  Orderbook converters
+# ---------------------------------------------------------------------------
+
+
+def test_to_orderbook_snapshot():
+    book = OrderBookResponse(
+        pricebook=PriceBook(
+            product_id="BTC-USD",
+            bids=[OrderBookLevel(price="50000", size="0.5")],
+            asks=[OrderBookLevel(price="50001", size="0.3")],
+        )
+    )
+    snap = to_orderbook_snapshot(book)
+    assert snap.trading_pair == "BTC-USD"
+    assert snap.bids == [(Decimal("50000"), Decimal("0.5"))]
+    assert snap.asks == [(Decimal("50001"), Decimal("0.3"))]
+
+
+def test_to_orderbook_update():
+    evt = Level2Event(
+        type="update",
+        product_id="BTC-USD",
+        updates=[
+            Level2Update(side="bid", event_time="t", price_level="50000", new_quantity="0.5"),
+            Level2Update(side="offer", event_time="t", price_level="50001", new_quantity="0.3"),
+        ],
+    )
+    upd = to_orderbook_update(evt, update_id=42)
+    assert upd.trading_pair == "BTC-USD"
+    assert upd.bids == [(Decimal("50000"), Decimal("0.5"))]
+    assert upd.asks == [(Decimal("50001"), Decimal("0.3"))]
+    assert upd.update_id == 42

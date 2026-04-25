@@ -83,3 +83,39 @@ def to_open_order(order: Order) -> OpenOrder:
         filled_amount=Decimal(order.filled_size),
         status=order.status.value,
     )
+
+
+# ---------------------------------------------------------------------------
+# 4.4  Orderbook converters
+# ---------------------------------------------------------------------------
+
+
+def to_orderbook_snapshot(book: OrderBookResponse) -> OrderBookSnapshot:
+    """Convert a Coinbase REST OrderBookResponse to an OrderBookSnapshot primitive."""
+    pb = book.pricebook
+    return OrderBookSnapshot(
+        trading_pair=from_exchange_pair(pb.product_id),
+        bids=[(Decimal(level.price), Decimal(level.size)) for level in pb.bids],
+        asks=[(Decimal(level.price), Decimal(level.size)) for level in pb.asks],
+        timestamp=pb.time.timestamp() if pb.time else 0.0,
+    )
+
+
+def to_orderbook_update(event: Level2Event, update_id: int) -> OrderBookUpdate:
+    """Convert a Coinbase WS Level2Event to an OrderBookUpdate primitive."""
+    bids = [
+        (Decimal(u.price_level), Decimal(u.new_quantity))
+        for u in event.updates
+        if u.side == "bid"
+    ]
+    asks = [
+        (Decimal(u.price_level), Decimal(u.new_quantity))
+        for u in event.updates
+        if u.side == "offer"
+    ]
+    return OrderBookUpdate(
+        trading_pair=from_exchange_pair(event.product_id),
+        bids=bids,
+        asks=asks,
+        update_id=update_id,
+    )
