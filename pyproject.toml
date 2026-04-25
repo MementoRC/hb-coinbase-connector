@@ -9,7 +9,11 @@ description = "Coinbase Advanced Trade connector for Hummingbot — exchange-spe
 requires-python = ">=3.10"
 license = {text = "Apache-2.0"}
 dependencies = [
-    "aiohttp>=3.8.0",
+    "pydantic>=2.0",
+    "pyjwt>=2.8",
+    "cryptography>=41",
+    "aiohttp>=3.9",
+    "hb-market-connector @ git+https://github.com/MementoRC/hb-market-connector.git@development",
 ]
 
 [project.optional-dependencies]
@@ -24,6 +28,9 @@ dev = [
 
 [tool.hatch.version]
 path = "coinbase_connector/__about__.py"
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["coinbase_connector"]
@@ -42,7 +49,7 @@ timeout = 30
 addopts = "--strict-markers --strict-config -v"
 
 [tool.ruff]
-target-version = "py310"
+target-version = "py311"
 line-length = 100
 
 [tool.ruff.lint]

@@ -4,7 +4,13 @@ platforms = ["linux-64", "osx-arm64", "osx-64", "win-64"]
 
 [dependencies]
 python = ">=3.10,<3.13"
-aiohttp = ">=3.8.0"
+pydantic = ">=2.0"
+pyjwt = ">=2.8"
+cryptography = ">=41"
+aiohttp = ">=3.9"
+
+[pypi-dependencies]
+hb-market-connector = { git = "https://github.com/MementoRC/hb-market-connector.git", branch = "development" }
 
 [feature.dev.dependencies]
 pytest = ">=9.0.3"
