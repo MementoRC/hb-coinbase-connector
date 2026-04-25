@@ -27,3 +27,13 @@ def to_exchange_pair(trading_pair: str) -> str:
 def from_exchange_pair(product_id: str) -> str:
     """Convert a Coinbase product_id to a Hummingbot trading pair (identity)."""
     return product_id
+
+
+# ---------------------------------------------------------------------------
+# 4.2  Balance converter
+# ---------------------------------------------------------------------------
+
+
+def to_balance(account: Account) -> Decimal:
+    """Extract the available balance as Decimal from an Account schema."""
+    return Decimal(account.available_balance.value)
