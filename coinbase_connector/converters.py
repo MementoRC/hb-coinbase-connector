@@ -1,4 +1,5 @@
 """Pure conversion functions: Coinbase schemas → market-connector primitives."""
+from datetime import datetime, timezone
 from decimal import Decimal
 
 from market_connector.primitives import (
@@ -10,7 +11,13 @@ from market_connector.primitives import (
     TradeType,
 )
 
-from coinbase_connector.schemas.rest import Account, Candle, Order, OrderBookResponse, OrderConfiguration
+from coinbase_connector.schemas.rest import (
+    Account,
+    Candle,
+    Order,
+    OrderBookResponse,
+    OrderConfiguration,
+)
 from coinbase_connector.schemas.ws import Level2Event, MarketTrade
 
 
@@ -119,3 +126,33 @@ def to_orderbook_update(event: Level2Event, update_id: int) -> OrderBookUpdate:
         asks=asks,
         update_id=update_id,
     )
+
+
+# ---------------------------------------------------------------------------
+# 4.5  Trade and candle converters
+# ---------------------------------------------------------------------------
+
+
+def to_trade_event(trade: MarketTrade) -> TradeEvent:
+    """Convert a Coinbase WS MarketTrade to a TradeEvent primitive."""
+    ts = datetime.fromisoformat(trade.time.replace("Z", "+00:00")).timestamp()
+    return TradeEvent(
+        exchange_trade_id=trade.trade_id,
+        trading_pair=from_exchange_pair(trade.product_id),
+        price=Decimal(trade.price),
+        amount=Decimal(trade.size),
+        side=_SIDE_MAP[trade.side],
+        timestamp=ts,
+    )
+
+
+def to_candle(candle: Candle) -> list:
+    """Convert a Coinbase REST Candle to OHLCV list: [timestamp, open, high, low, close, volume]."""
+    return [
+        int(candle.start),
+        Decimal(candle.open),
+        Decimal(candle.high),
+        Decimal(candle.low),
+        Decimal(candle.close),
+        Decimal(candle.volume),
+    ]

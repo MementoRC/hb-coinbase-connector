@@ -6,14 +6,17 @@ from market_connector.primitives import OrderType, TradeType
 from coinbase_connector.converters import (
     from_exchange_pair,
     to_balance,
+    to_candle,
     to_exchange_pair,
     to_open_order,
     to_orderbook_snapshot,
     to_orderbook_update,
+    to_trade_event,
 )
 from coinbase_connector.schemas.rest import (
     Account,
     Balance,
+    Candle,
     LimitGTCConfig,
     Order,
     OrderBookLevel,
@@ -21,7 +24,7 @@ from coinbase_connector.schemas.rest import (
     OrderConfiguration,
     PriceBook,
 )
-from coinbase_connector.schemas.ws import Level2Event, Level2Update
+from coinbase_connector.schemas.ws import Level2Event, Level2Update, MarketTrade
 
 
 def test_to_exchange_pair_passthrough():
@@ -110,3 +113,45 @@ def test_to_orderbook_update():
     assert upd.bids == [(Decimal("50000"), Decimal("0.5"))]
     assert upd.asks == [(Decimal("50001"), Decimal("0.3"))]
     assert upd.update_id == 42
+
+
+# ---------------------------------------------------------------------------
+# 4.5  Trade and candle converters
+# ---------------------------------------------------------------------------
+
+
+def test_to_trade_event():
+    trade = MarketTrade(
+        trade_id="t1",
+        product_id="BTC-USD",
+        price="50000",
+        size="0.5",
+        side="BUY",
+        time="2026-04-24T12:00:00Z",
+    )
+    evt = to_trade_event(trade)
+    assert evt.exchange_trade_id == "t1"
+    assert evt.trading_pair == "BTC-USD"
+    assert evt.price == Decimal("50000")
+    assert evt.amount == Decimal("0.5")
+    assert evt.side == TradeType.BUY
+
+
+def test_to_candle_format():
+    candle = Candle(
+        start="1714000000",
+        low="49000",
+        high="51000",
+        open="50000",
+        close="50500",
+        volume="10.5",
+    )
+    result = to_candle(candle)
+    assert result == [
+        1714000000,
+        Decimal("50000"),
+        Decimal("51000"),
+        Decimal("49000"),
+        Decimal("50500"),
+        Decimal("10.5"),
+    ]
